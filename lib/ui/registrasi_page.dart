@@ -1,9 +1,16 @@
+import 'package:belajarflutter/bloc/registrasi_bloc.dart';
+import 'package:belajarflutter/widget/success_dialog.dart';
+import 'package:belajarflutter/widget/warning_dialog.dart';
 import 'package:flutter/material.dart';
 
 class RegistrasiPage extends StatefulWidget{
+  const RegistrasiPage({super.key});
 
   @override
-  _RegistrasiPageState createState() =>_RegistrasiPageState();
+  State<RegistrasiPage> createState() {
+    return _RegistrasiPageState();
+  }
+  // _RegistrasiPageState createState() =>_RegistrasiPageState();
 
 }
 
@@ -68,9 +75,87 @@ class _RegistrasiPageState extends State<RegistrasiPage>{
 
         Pattern pattern = r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0 -9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
 
-
+        RegExp regex = RegExp(pattern.toString());
+        if(!regex.hasMatch(value)) {
+          return "Email tidak valid";
+        }
         return null;
       },
     );
+  }
+
+  Widget _passwordTextField() {
+    return TextFormField(
+      decoration: const InputDecoration(labelText: 'Password'),
+      keyboardType: TextInputType.text,
+      obscureText: true,
+      controller: _passwordTextboxController,
+      validator: (value) {
+        if(value!.length < 6) {
+          return "Password harus diisi minimal 6 karakter";
+        }
+        return null;
+      },
+    );
+  }
+
+  Widget _passwordKonfirmasiTextField() {
+    return TextFormField(
+      decoration: const InputDecoration(labelText: "Konfirmasi Password"),
+      keyboardType: TextInputType.text,
+      obscureText: true,
+      validator: (value) {
+        if(value != _passwordTextboxController.text) {
+          return "Konfirmasi password tidak sama";
+        }
+        return null;
+      },
+    );
+  }
+
+  Widget _buttonRegistrasi() {
+    return ElevatedButton(
+        onPressed: () {
+          var validate = _formKey.currentState!.validate();
+          if(validate) {
+            if(!_isLoading) _submit();
+          }
+        }, child: const Text("Registrasi"));
+  }
+
+  void _submit() {
+    _formKey.currentState!.save();
+    setState(() {
+      _isLoading = true;
+    });
+    RegistrasiBloc.registrasi(
+      nama: _namaTextboxController.text,
+      email: _emailTextboxController.text,
+      password: _passwordTextboxController.text
+    ).then((value) => {
+      print(value),
+      showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) => SuccessDialog(
+            description: "Registrasi berhasil, silahkan login",
+            okClick: () {
+              Navigator.pop(context);
+            },
+          )
+      )
+    }, onError: (error) {
+      print(error);
+      showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) => const WarningDialog(
+            description: "Registrasi gagal, silahkan coba lagi.",
+          )
+      );
+    });
+    setState(() {
+      _isLoading = false;
+    });
   }
 }

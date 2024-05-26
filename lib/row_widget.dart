@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class RowWidget extends StatelessWidget {
-  const RowWidget({Key? key}) : super(key: key);
+  const RowWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -9,8 +9,8 @@ class RowWidget extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Widget Row'),
       ),
-      body: Row(
-        children: const [
+      body: const Row(
+        children: [
           Text('Row 1'),
           Text('Row 2'),
           Text('Row 3'),
